@@ -189,14 +189,14 @@ export default function HeroSection() {
                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
                   <Image
                     className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block object-contain object-top"
-                    src="https://gist.github.com/user-attachments/assets/f33d9916-d3dd-44df-85f4-1d822e86e8e8"
+                    src="https://private-user-images.githubusercontent.com/76267404/500426158-f33d9916-d3dd-44df-85f4-1d822e86e8e8.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjA0MzQ5MDEsIm5iZiI6MTc2MDQzNDYwMSwicGF0aCI6Ii83NjI2NzQwNC81MDA0MjYxNTgtZjMzZDk5MTYtZDNkZC00NGRmLTg1ZjQtMWQ4MjJlODZlOGU4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMTQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDE0VDA5MzY0MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdjZDMxZTkzODFlY2EzYzU5OTgzZjhlMmE0OWUzYTRlMDBiOTM2MTM5OTYzMDNkMDkxZmE3YzU2YzhiZTdhZGMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.BwdXdNkNFJLuUdj1colM8kovqSKzNOGpYv3CdNSQanI"
                     alt="app screen"
                     width="2700"
                     height="1440"
                   />
                   <Image
                     className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden object-contain object-top"
-                    src="https://gist.github.com/user-attachments/assets/4b8e3c9d-4d48-47e3-8ffd-ce3e1253edcb"
+                    src="https://private-user-images.githubusercontent.com/76267404/500426180-4b8e3c9d-4d48-47e3-8ffd-ce3e1253edcb.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjA0MzQ5MDEsIm5iZiI6MTc2MDQzNDYwMSwicGF0aCI6Ii83NjI2NzQwNC81MDA0MjYxODAtNGI4ZTNjOWQtNGQ0OC00N2UzLThmZmQtY2UzZTEyNTNlZGNiLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMTQlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDE0VDA5MzY0MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTEzMjI2YTFmODQzNzhkMTFiYjVmZmVhNzYwOTQ3MTY2NGM0YzFmZDY1MzE4NWRiOTU1ZDU3M2FlN2NkYmExY2YmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.YFyKilKoozy1pnDVUI17BqQAijfLPyD2bZZzuSNocSY"
                     alt="app screen"
                     width="2700"
                     height="1440"
