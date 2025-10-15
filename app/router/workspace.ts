@@ -4,6 +4,8 @@ import { base } from "@/app/middlewares/base";
 import { z } from "zod";
 import { requiredMiddleware } from "../middlewares/auth";
 import { requiredWorkspaceMiddleware } from "../middlewares/workspace";
+import { workspaceSchema } from "../schemas/workspace";
+import { init, Organizations } from "@kinde/management-api-js";
 
 export const listWorkspaces = base
   .use(requiredMiddleware)
@@ -45,5 +47,65 @@ export const listWorkspaces = base
       })),
       user: context.user,
       currentWorkspace: context.workspace,
+    };
+  });
+
+export const createWorkspace = base
+  .use(requiredMiddleware)
+  .use(requiredWorkspaceMiddleware)
+  .route({
+    method: "POST",
+    path: "/workspaces",
+    summary: "Create a new workspace",
+    tags: ["workspaces"],
+  })
+  .input(workspaceSchema)
+  .output(
+    z.object({
+      orgCode: z.string(),
+      workspaceName: z.string(),
+    })
+  )
+  .handler(async ({ context, errors, input }) => {
+    init();
+
+    let data;
+    try {
+      data = await Organizations.createOrganization({
+        requestBody: {
+          name: input.name,
+        },
+      });
+    } catch {
+      throw errors.FORBIDDEN();
+    }
+
+    if (!data.organization?.code) {
+      throw errors.FORBIDDEN({
+        message: "Organization code not found",
+      });
+    }
+    try {
+      await Organizations.addOrganizationUsers({
+        orgCode: data.organization.code,
+        requestBody: {
+          users: [
+            {
+              id: context.user.id,
+              roles: ["Owner"],
+            },
+          ],
+        },
+      });
+    } catch {
+      throw errors.FORBIDDEN();
+    }
+
+    const { refreshTokens } = getKindeServerSession();
+    await refreshTokens();
+
+    return {
+      orgCode: data.organization.code,
+      workspaceName: input.name,
     };
   });

@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/components/ui/AuthProvider";
 import { ThemeProvider } from "@/lib/theme-provider";
 import "../lib/orpc.server"; // for pre-rendering
+import { Providers } from "@/lib/providers";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,11 +29,19 @@ export default function RootLayout({
 }>) {
   return (
     <AuthProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ThemeProvider attribute="class">{children}</ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Providers>{children}</Providers>
+            <Toaster closeButton position="top-center" />
+          </ThemeProvider>
         </body>
       </html>
     </AuthProvider>
