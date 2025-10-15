@@ -47,7 +47,7 @@ export function UserNav() {
         align="end"
         side="right"
         sideOffset={8}
-        className="w-[200px"
+        className="w-[200px]"
       >
         <DropdownMenuLabel className="font-normal flex items-center gap-2 px-1 py-1.5 text-left text-sm">
           <Avatar className="relative size-8 rounded-lg">

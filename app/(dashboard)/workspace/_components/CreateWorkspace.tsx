@@ -30,6 +30,7 @@ import { workspaceSchema, WorkspaceSchemaType } from "@/app/schemas/workspace";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { isDefinedError } from "@orpc/client";
 
 export function CreateWorkspace() {
   const [open, setOpen] = useState(false);
@@ -59,6 +60,15 @@ export function CreateWorkspace() {
         setOpen(false);
       },
       onError: (error) => {
+        if (isDefinedError(error)) {
+          if (error.code === "RATE_LIMITED") {
+            toast.error(error.message);
+            return;
+          }
+
+          toast.error(error.message);
+          return;
+        }
         toast.error("Failed to create workspace, try again!");
       },
     })
