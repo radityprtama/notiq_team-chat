@@ -1,5 +1,9 @@
 "use client";
-import { channelSchema, transformChannel } from "@/app/schemas/channel";
+import {
+  channelSchema,
+  ChannelSchemaType,
+  transformChannel,
+} from "@/app/schemas/channel";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,10 +22,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { orpc } from "@/lib/orpc";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isDefinedError } from "@orpc/client";
+import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export function CreateNewChannel() {
   const [open, setOpen] = useState(false);
@@ -32,6 +40,27 @@ export function CreateNewChannel() {
       name: "",
     },
   });
+
+  const createChannelMutation = useMutation(
+    orpc.channel.create.mutationOptions({
+      onSuccess: (newChannel) => {
+        toast.success(`Channel ${newChannel.name} created successfully!`);
+        form.reset();
+        setOpen(false);
+      },
+      onError: (error) => {
+        if (isDefinedError(error)) {
+          toast.error(error.message);
+          return;
+        }
+        toast.error("Failed to create channel, please try again.");
+      },
+    })
+  );
+
+  function onSubmit(values: ChannelSchemaType) {
+    createChannelMutation.mutate(values);
+  }
 
   const watchedName = form.watch("name");
   const transformedName = watchedName ? transformChannel(watchedName) : "";
@@ -51,7 +80,7 @@ export function CreateNewChannel() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"
@@ -73,8 +102,14 @@ export function CreateNewChannel() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Create new channel
+            <Button
+              disabled={createChannelMutation.isPending}
+              type="submit"
+              className="w-full"
+            >
+              {createChannelMutation.isPending
+                ? "Creating..."
+                : "Create new Channel"}
             </Button>
           </form>
         </Form>

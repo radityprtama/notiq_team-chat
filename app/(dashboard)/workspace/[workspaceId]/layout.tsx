@@ -9,13 +9,24 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { ChannelList } from "./_components/ChannelList";
 import { WorkspaceMemberList } from "./_components/WorkspaceMemberList";
+import { getQueryClient, HydrateClient } from "@/lib/query/hydration";
+import { orpc } from "@/lib/orpc";
 
-const ChannelListLayout = ({ children }: { children: React.ReactNode }) => {
+const ChannelListLayout = async ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const queryClient = getQueryClient();
+
+  await queryClient.prefetchQuery(orpc.channel.list.queryOptions());
   return (
     <>
       <div className="flex h-full w-80 flex-col bg-secondary border-r border-border">
         <div className="flex items-center px-4 h-14 border-b border-border">
-          <WorkspaceHeader />
+          <HydrateClient client={queryClient}>
+            <WorkspaceHeader />
+          </HydrateClient>
         </div>
         <div className="px-4 py-2">
           <CreateNewChannel />

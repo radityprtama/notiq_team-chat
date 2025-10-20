@@ -27,3 +27,5 @@ export const channelSchema = z.object({
       return transformed;
     }),
 });
+
+export type ChannelSchemaType = z.infer<typeof channelSchema>;
