@@ -38,7 +38,9 @@ const ChannelListLayout = async ({
               <ChevronDown className="size-4 transition-transform duration-200" />
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <ChannelList />
+              <HydrateClient client={queryClient}>
+                <ChannelList />
+              </HydrateClient>
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -50,7 +52,9 @@ const ChannelListLayout = async ({
               <ChevronUp className="size-4 transition-transform duration-200" />
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <WorkspaceMemberList />
+              <HydrateClient client={queryClient}>
+                <WorkspaceMemberList />
+              </HydrateClient>
             </CollapsibleContent>
           </Collapsible>
         </div>
