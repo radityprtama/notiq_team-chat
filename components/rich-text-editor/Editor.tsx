@@ -3,12 +3,19 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { editorExtension } from "./extensions";
 import { MenuBar } from "./Menubar";
+import { ReactNode } from "react";
 
 interface iRichTextEditor {
   field: any;
+  sendButton: ReactNode;
+  footerLeft?: ReactNode;
 }
 
-export function RichTextEditor({ field }: iRichTextEditor) {
+export function RichTextEditor({
+  field,
+  sendButton,
+  footerLeft,
+}: iRichTextEditor) {
   const editor = useEditor({
     immediatelyRender: false,
     content: (() => {
@@ -41,6 +48,10 @@ export function RichTextEditor({ field }: iRichTextEditor) {
         editor={editor}
         className="max-h-[200px] overflow-y-auto"
       />
+      <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-input bg-card">
+        <div className="min-h-8 flex items-center">{footerLeft}</div>
+        <div className="shrink-0">{sendButton}</div>
+      </div>
     </div>
   );
 }
