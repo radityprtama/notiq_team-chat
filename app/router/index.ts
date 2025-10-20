@@ -5,4 +5,8 @@ export const router = {
     list: listWorkspaces,
     create: createWorkspace,
   },
+
+  channel: {
+    create: createChannel,
+  },
 };
