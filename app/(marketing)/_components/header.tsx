@@ -54,9 +54,7 @@ export const HeroHeader = () => {
                 className="flex items-center space-x-2"
               >
                 <Image src={Logo} alt="logo" width={32} height={32} />
-                <h1 className="text-2xl font-bold">
-                  <span className="text-primary">Notiq</span>
-                </h1>
+                <h1 className="text-2xl font-bold">Notiq</h1>
               </Link>
 
               <button
