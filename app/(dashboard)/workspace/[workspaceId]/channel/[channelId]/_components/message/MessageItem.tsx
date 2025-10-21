@@ -1,24 +1,17 @@
+import { SafeContent } from "@/components/rich-text-editor/SafeContent";
+import { Message } from "@/lib/generated/prisma";
+import { getAvatar } from "@/lib/get-avatar";
 import Image from "next/image";
 
 interface iMessageItem {
-  id: number;
-  message: string;
-  date: Date;
-  avatar: string;
-  userName: string;
+  message: Message;
 }
 
-export function MessageItem({
-  id,
-  message,
-  date,
-  avatar,
-  userName,
-}: iMessageItem) {
+export function MessageItem({ message }: iMessageItem) {
   return (
     <div className="flex space-x-3 relative p-3 rounded-lg group hover:bg-muted/50">
       <Image
-        src={avatar}
+        src={getAvatar(message.authorAvatar, message.authorEmail)}
         alt="User Avatar"
         width={32}
         height={32}
@@ -27,22 +20,25 @@ export function MessageItem({
 
       <div className="flex-1 space-y-1 min-w-0">
         <div className="flex items-center gap-x-2">
-          <p className="font-medium leading-none">{userName}</p>
+          <p className="font-medium leading-none">{message.authorName}</p>
           <p className="text-xs text-muted-foreground leading-none">
             {new Intl.DateTimeFormat("en-GB", {
               day: "numeric",
               month: "short",
               year: "numeric",
-            }).format(date)}{" "}
+            }).format(message.createdAt)}{" "}
             {new Intl.DateTimeFormat("en-GB", {
               hour12: false,
               hour: "2-digit",
               minute: "2-digit",
-            }).format(date)}
+            }).format(message.createdAt)}
           </p>
         </div>
 
-        <p className="text-sm break-work max-w-none">{message}</p>
+        <SafeContent
+          className="tetx-sm break-words prose dark:prose-invert max-w-none mark:text-primary"
+          content={JSON.parse(message.content)}
+        />
       </div>
     </div>
   );

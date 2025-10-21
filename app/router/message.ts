@@ -8,6 +8,7 @@ import prisma from "@/lib/db";
 import { createMessageSchema } from "../schemas/message";
 import { getAvatar } from "@/lib/get-avatar";
 import { Message } from "@/lib/generated/prisma";
+import { readSecurityMiddleware } from "../middlewares/arcjet/read";
 
 export const createMessage = base
   .use(requiredMiddleware)
@@ -48,4 +49,45 @@ export const createMessage = base
     return {
       ...created,
     };
+  });
+
+export const listMessage = base
+  .use(requiredMiddleware)
+  .use(requiredWorkspaceMiddleware)
+  .use(standardSecurityMiddleware)
+  .use(readSecurityMiddleware)
+  .route({
+    method: "GET",
+    path: "/messages",
+    summary: "List messages",
+    tags: ["messages"],
+  })
+  .input(
+    z.object({
+      channelId: z.string(),
+    }),
+  )
+  .output(z.array(z.custom<Message>()))
+  .handler(async ({ input, context, errors }) => {
+    const channel = await prisma.channel.findFirst({
+      where: {
+        id: input.channelId,
+        workspaceId: context.workspace.orgCode,
+      },
+    });
+
+    if (!channel) {
+      throw errors.FORBIDDEN;
+    }
+
+    const data = await prisma.message.findMany({
+      where: {
+        channelId: input.channelId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return data;
   });
