@@ -127,8 +127,8 @@ export default function HeroSection() {
                   as="p"
                   className="mx-auto mt-8 max-w-2xl text-balance text-lg"
                 >
-                  TeamFlow is a modern, AI-powered communication platform
-                  designed to enhance team collaboration and productivity.
+                  Notiq is a modern, AI-powered communication platform designed
+                  to enhance team collaboration and productivity.
                 </TextEffect>
 
                 <AnimatedGroup
