@@ -16,6 +16,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useAttachmentUpload } from "@/hooks/use-attachment-upload";
 
 interface iMessageInput {
   channelId: string;
@@ -24,6 +25,7 @@ interface iMessageInput {
 export function MessageInputForm({ channelId }: iMessageInput) {
   const queryClient = useQueryClient();
   const [editorKey, setEditorKey] = useState(0);
+  const upload = useAttachmentUpload();
   const form = useForm({
     resolver: zodResolver(createMessageSchema),
     defaultValues: {
@@ -39,6 +41,7 @@ export function MessageInputForm({ channelId }: iMessageInput) {
           queryKey: orpc.message.list.key(),
         });
         form.reset({ channelId, content: "" });
+        upload.clear();
         setEditorKey((k) => k + 1);
         return toast.success("message created successfully");
       },
@@ -49,7 +52,10 @@ export function MessageInputForm({ channelId }: iMessageInput) {
   );
 
   function onSubmit(data: createMessageSchema) {
-    createMessageMutation.mutate(data);
+    createMessageMutation.mutate({
+      ...data,
+      imageUrl: upload.stageUrl ?? undefined,
+    });
   }
   return (
     <Form {...form}>
@@ -61,6 +67,7 @@ export function MessageInputForm({ channelId }: iMessageInput) {
             <FormItem>
               <FormControl>
                 <MessageComposer
+                  upload={upload}
                   key={editorKey}
                   value={field.value}
                   onChange={field.onChange}

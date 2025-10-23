@@ -39,6 +39,18 @@ export function MessageItem({ message }: iMessageItem) {
           className="tetx-sm break-words prose dark:prose-invert max-w-none mark:text-primary"
           content={JSON.parse(message.content)}
         />
+
+        {message.imageUrl && (
+          <div className="mt-3">
+            <Image
+              src={message.imageUrl}
+              alt="Message Image"
+              width={512}
+              height={512}
+              className="rounded-md max-h-[320px] w-auto object-contain"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

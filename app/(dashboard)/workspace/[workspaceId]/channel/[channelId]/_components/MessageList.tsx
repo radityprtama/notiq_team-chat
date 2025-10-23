@@ -5,7 +5,6 @@ import { MessageItem } from "./message/MessageItem";
 import { orpc } from "@/lib/orpc";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { set } from "zod/v3";
 import { Button } from "@/components/ui/button";
 
 export function MessageList() {
@@ -120,7 +119,7 @@ export function MessageList() {
   return (
     <div className="relative h-full">
       <div
-        className="h-full overflow-y-auto px-4"
+        className="h-full overflow-y-auto px-4 flex flex-col space-y-1"
         ref={scrollRef}
         onScroll={handleScroll}
       >
