@@ -1,6 +1,10 @@
 import arcjet, { createMiddleware, detectBot } from "@arcjet/next";
 import { withAuth } from "@kinde-oss/kinde-auth-nextjs/server";
-import { NextMiddleware, NextRequest, NextResponse } from "next/server";
+import {
+  NextResponse,
+  type NextMiddleware,
+  type NextRequest,
+} from "next/server";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -18,41 +22,37 @@ const aj = arcjet({
 });
 
 async function existingMiddleware(req: NextRequest) {
-  const anyReq = req as {
-    nextUrl: NextRequest["nextUrl"];
-    kindeAuth?: {
-      token?: any;
-      user?: any;
-    };
-  };
-
-  const url = req.nextUrl;
+  const { nextUrl } = req as NextRequest;
+  const kinde = (req as any).kindeAuth;
 
   const orgCode =
-    anyReq.kindeAuth?.user.org_code ||
-    anyReq.kindeAuth?.token?.org_code ||
-    anyReq.kindeAuth?.token?.claims?.org_code;
+    kinde?.user?.org_code ||
+    kinde?.token?.org_code ||
+    kinde?.token?.claims?.org_code ||
+    kinde?.token?.claims?.organization;
 
-  if (
-    url.pathname.startsWith("/workspace") &&
-    !url.pathname.includes(orgCode?.value || "")
-  ) {
-    url.pathname = `/workspace/${orgCode}`;
+  if (nextUrl.pathname.startsWith("/workspace")) {
+    if (!orgCode) {
+      // kalau user belum punya org, redirect ke homepage
+      return NextResponse.redirect(new URL("/", req.url));
+    }
 
-    return NextResponse.redirect(url);
+    if (!nextUrl.pathname.includes(orgCode)) {
+      nextUrl.pathname = `/workspace/${orgCode}`;
+      return NextResponse.redirect(nextUrl);
+    }
   }
+
   return NextResponse.next();
 }
 
 export default createMiddleware(
   aj,
   withAuth(existingMiddleware, {
-    publicPaths: ["/"],
+    publicPaths: ["/", "/api/auth/**"],
   }) as NextMiddleware,
 );
 
 export const config = {
-  // matcher tells Next.js which routes to run the middleware on.
-  // This runs the middleware on all routes except for static assets.
   matcher: ["/((?!_next/static|_next/image|favicon.ico|/rpc).*)"],
 };
