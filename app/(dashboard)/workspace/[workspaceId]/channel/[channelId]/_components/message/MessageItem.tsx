@@ -37,7 +37,14 @@ export function MessageItem({ message }: iMessageItem) {
 
         <SafeContent
           className="tetx-sm break-words prose dark:prose-invert max-w-none mark:text-primary"
-          content={JSON.parse(message.content)}
+          content={(() => {
+            try {
+              return JSON.parse(message.content);
+            } catch {
+              // Return empty content if JSON parsing fails
+              return { type: "doc", content: [] };
+            }
+          })()}
         />
 
         {message.imageUrl && (
