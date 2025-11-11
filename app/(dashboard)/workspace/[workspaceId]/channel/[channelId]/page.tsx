@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ChannelPageMain = () => {
   const { channelId } = useParams<{ channelId: string }>();
@@ -25,7 +26,19 @@ const ChannelPageMain = () => {
   return (
     <div className="flex h-screen w-full">
       <div className="flex flex-col flex-1 min-w-0">
-        <ChannelHeader channelName={data?.channelName} />
+        {/* <ChannelHeader channelName={data?.channelName} /> */}
+        {isLoading ? (
+          <div className="flex items-center justify-between h-14 p-4 border-b">
+            <Skeleton className="h-6 w-40" />
+            <div className="flex items-center flex-x-2">
+              <Skeleton className="h-8 w-25" />
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="size8" />
+            </div>
+          </div>
+        ) : (
+          <ChannelHeader channelName={data?.channelName} />
+        )}
 
         <div className="flex-1 overflow-hidden mb-4">
           <MessageList />

@@ -15,7 +15,6 @@ export function MessageList() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [newMessages, setNewMessages] = useState(false);
   const lastItemIdRef = useRef<string | undefined>(undefined);
   const infiniteOptions = orpc.message.list.infiniteOptions({
     input: (pageParams: string | undefined) => ({
@@ -149,10 +148,8 @@ export function MessageList() {
           el.scrollTop = el.scrollHeight;
         });
 
-        setNewMessages(false);
         setIsAtBottom(true);
       } else {
-        setNewMessages(true);
       }
     }
 
@@ -166,7 +163,6 @@ export function MessageList() {
 
     bottomRef.current?.scrollIntoView({ block: "end" });
 
-    setNewMessages(false);
     setIsAtBottom(true);
   };
   return (

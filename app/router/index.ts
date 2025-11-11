@@ -1,4 +1,5 @@
 import { createChannel, getChannel, listChannels } from "./channel";
+import { InviteMember, ListMembers } from "./member";
 import { createMessage, listMessage } from "./message";
 import { createWorkspace, listWorkspaces } from "./workspace";
 
@@ -6,6 +7,10 @@ export const router = {
   workspace: {
     list: listWorkspaces,
     create: createWorkspace,
+    member: {
+      list: ListMembers,
+      invite: InviteMember,
+    },
   },
 
   channel: {
