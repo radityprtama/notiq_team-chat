@@ -9,6 +9,7 @@ import { createMessageSchema, updateMessageSchema } from "../schemas/message";
 import { getAvatar } from "@/lib/get-avatar";
 import { Message } from "@/lib/generated/prisma";
 import { readSecurityMiddleware } from "../middlewares/arcjet/read";
+import { ListMessageInput } from "@/lib/types";
 
 export const createMessage = base
   .use(requiredMiddleware)
@@ -91,7 +92,7 @@ export const listMessage = base
   )
   .output(
     z.object({
-      items: z.array(z.custom<Message>()),
+      items: z.array(z.custom<ListMessageInput>()),
       nextCursor: z.string().optional(),
     })
   )
@@ -122,13 +123,31 @@ export const listMessage = base
         : {}),
       take: limit,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      include: {
+        _count: { select: { replies: true } },
+      },
     });
+
+    const items: ListMessageInput[] = messages.map((m) => ({
+      id: m.id,
+      content: m.content,
+      imageUrl: m.imageUrl,
+      createdAt: m.createdAt,
+      updatedAt: m.updatedAt,
+      authorId: m.authorId,
+      authorEmail: m.authorEmail,
+      authorName: m.authorName,
+      authorAvatar: m.authorAvatar,
+      channelId: m.channelId,
+      threadId: m.threadId,
+      repliesCount: m._count.replies,
+    }));
 
     const nextCursor =
       messages.length === limit ? messages[messages.length - 1].id : undefined;
 
     return {
-      items: messages,
+      items: items,
       nextCursor,
     };
   });
