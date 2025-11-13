@@ -2,12 +2,17 @@ import { SafeContent } from "@/components/rich-text-editor/SafeContent";
 import { Message } from "@/lib/generated/prisma";
 import { getAvatar } from "@/lib/get-avatar";
 import Image from "next/image";
+import { MessageHoverToolbar } from "../toolbar";
+import { useState } from "react";
+import { EditMessage } from "../toolbar/EditMessage";
 
 interface iMessageItem {
   message: Message;
+  currentUserId: string;
 }
 
-export function MessageItem({ message }: iMessageItem) {
+export function MessageItem({ message, currentUserId }: iMessageItem) {
+  const [isEditing, setIsEditing] = useState(false);
   return (
     <div className="flex space-x-3 relative p-3 rounded-lg group hover:bg-muted/50">
       <Image
@@ -35,30 +40,46 @@ export function MessageItem({ message }: iMessageItem) {
           </p>
         </div>
 
-        <SafeContent
-          className="tetx-sm break-words prose dark:prose-invert max-w-none mark:text-primary"
-          content={(() => {
-            try {
-              return JSON.parse(message.content);
-            } catch {
-              // Return empty content if JSON parsing fails
-              return { type: "doc", content: [] };
-            }
-          })()}
-        />
-
-        {message.imageUrl && (
-          <div className="mt-3">
-            <Image
-              src={message.imageUrl}
-              alt="Message Image"
-              width={512}
-              height={512}
-              className="rounded-md max-h-[320px] w-auto object-contain"
+        {isEditing ? (
+          <EditMessage
+            message={message}
+            onCancel={() => setIsEditing(false)}
+            onSave={() => setIsEditing(false)}
+          />
+        ) : (
+          <>
+            <SafeContent
+              className="tetx-sm break-words prose dark:prose-invert max-w-none mark:text-primary"
+              content={(() => {
+                try {
+                  return JSON.parse(message.content);
+                } catch {
+                  // Return empty content if JSON parsing fails
+                  return { type: "doc", content: [] };
+                }
+              })()}
             />
-          </div>
+
+            {message.imageUrl && (
+              <div className="mt-3">
+                <Image
+                  src={message.imageUrl}
+                  alt="Message Image"
+                  width={512}
+                  height={512}
+                  className="rounded-md max-h-[320px] w-auto object-contain"
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      <MessageHoverToolbar
+        messageId={message.id}
+        canEdit={message.authorId === currentUserId}
+        onEdit={() => setIsEditing(true)}
+      />
     </div>
   );
 }
