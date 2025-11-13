@@ -77,7 +77,10 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
           previous,
         };
       },
-      onSuccess: () => {
+      onSuccess: (_data, _vars, ctx) => {
+        queryClient.invalidateQueries({
+          queryKey: ctx.listoptions.queryKey,
+        });
         form.reset({ channelId, content: "", threadId });
         upload.clear();
         setEditorKey((prev) => prev + 1);
@@ -85,6 +88,11 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
       },
       onError: (_err, _vars, ctx) => {
         if (!ctx) return;
+        const { listoptions, previous } = ctx;
+
+        if (previous) {
+          queryClient.setQueryData(listoptions.queryKey, previous);
+        }
         return toast.error("Something went wrong");
       },
     })
