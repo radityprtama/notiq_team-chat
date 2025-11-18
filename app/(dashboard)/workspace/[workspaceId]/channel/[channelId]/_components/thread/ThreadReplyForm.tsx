@@ -15,7 +15,6 @@ import {
 } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
-import { Message } from "@/lib/generated/prisma";
 import { KindeUser } from "@kinde-oss/kinde-auth-nextjs";
 import { getAvatar } from "@/lib/get-avatar";
 import { ListMessageInput } from "@/lib/types";
@@ -64,7 +63,7 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
 
         const previous = queryClient.getQueryData(listoptions.queryKey);
 
-        const optimistic: Message = {
+        const optimistic: ListMessageInput = {
           id: `optimistic-${crypto.randomUUID()}`,
           content: data.content,
           createdAt: new Date(),
@@ -76,6 +75,8 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
           channelId: data.channelId,
           threadId: data.threadId!,
           imageUrl: upload.stageUrl ?? null,
+          reactions: [],
+          replyCount: 0,
         };
 
         queryClient.setQueryData(listoptions.queryKey, (oldData) => {
@@ -95,9 +96,7 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
             const pages = oldData.pages.map((page) => ({
               ...page,
               items: page.items.map((m) =>
-                m.id === threadId
-                  ? { ...m, repliesCount: m.repliesCount + 1 }
-                  : m
+                m.id === threadId ? { ...m, replyCount: m.replyCount + 1 } : m,
               ),
             }));
 
@@ -105,7 +104,7 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
               ...oldData,
               pages,
             };
-          }
+          },
         );
 
         return {
@@ -131,7 +130,7 @@ export function ThreadReplyForm({ threadId, user }: ThreadReplyFormProps) {
         }
         return toast.error("Something went wrong");
       },
-    })
+    }),
   );
 
   function onSubmit(data: createMessageSchema) {

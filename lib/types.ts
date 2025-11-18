@@ -1,5 +1,7 @@
+import { GroupReactionSchema } from "@/app/schemas/message";
 import { Message } from "./generated/prisma";
 
 export type ListMessageInput = Message & {
-  repliesCount: number;
+  replyCount: number;
+  reactions: GroupReactionSchema[];
 };

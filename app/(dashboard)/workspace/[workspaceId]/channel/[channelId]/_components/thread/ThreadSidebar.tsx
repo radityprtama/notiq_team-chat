@@ -27,7 +27,7 @@ export function ThreadSidebar({ user }: ThreadSidebarProps) {
         messageId: selectedThreadId!,
       },
       enabled: Boolean(selectedThreadId),
-    })
+    }),
   );
 
   const messageCount = data?.messages.length ?? 0;
@@ -183,7 +183,11 @@ export function ThreadSidebar({ user }: ThreadSidebarProps) {
                 </p>
                 <div className="space-y-1">
                   {data.messages.map((reply) => (
-                    <ThreadReply key={reply.id} message={reply} />
+                    <ThreadReply
+                      key={reply.id}
+                      message={reply}
+                      selectedThreadId={selectedThreadId!}
+                    />
                   ))}
                 </div>
               </div>

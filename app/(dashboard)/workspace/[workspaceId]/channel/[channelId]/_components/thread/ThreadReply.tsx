@@ -1,11 +1,14 @@
 import Image from "next/image";
 import { Message } from "@/lib/generated/prisma";
 import { SafeContent } from "@/components/rich-text-editor/SafeContent";
+import { ReactionBar } from "../reaction/ReactionBar";
+import { ListMessageInput } from "@/lib/types";
 interface ThreadReplyProps {
-  message: Message;
+  message: ListMessageInput;
+  selectedThreadId: string;
 }
 
-export function ThreadReply({ message }: ThreadReplyProps) {
+export function ThreadReply({ message, selectedThreadId }: ThreadReplyProps) {
   return (
     <div className="flex space-x-3 hover:bg-muted/30 rounded-lg">
       <Image
@@ -45,6 +48,12 @@ export function ThreadReply({ message }: ThreadReplyProps) {
             />
           </div>
         )}
+
+        <ReactionBar
+          context={{ type: "thread", threadId: selectedThreadId }}
+          reaction={message.reactions}
+          messageId={message.id}
+        />
       </div>
     </div>
   );

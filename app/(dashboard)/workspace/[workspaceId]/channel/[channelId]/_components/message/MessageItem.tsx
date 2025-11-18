@@ -9,6 +9,7 @@ import { MessageSquare } from "lucide-react";
 import { useThread } from "@/providers/ThreadProvider";
 import { orpc } from "@/lib/orpc";
 import { useQueryClient } from "@tanstack/react-query";
+import { ReactionBar } from "../reaction/ReactionBar";
 
 interface iMessageItem {
   message: ListMessageInput;
@@ -93,10 +94,16 @@ export function MessageItem({ message, currentUserId }: iMessageItem) {
               </div>
             )}
 
-            {message.repliesCount > 0 && (
+            <ReactionBar
+              messageId={message.id}
+              reaction={message.reactions}
+              context={{ type: "list", channelId: message.channelId! }}
+            />
+
+            {message.replyCount > 0 && (
               <button
                 type="button"
-                className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground 
+                className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground
                 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border cursor-pointer"
                 onClick={() => openThread(message.id)}
                 onMouseEnter={prefetchThread}
@@ -104,8 +111,8 @@ export function MessageItem({ message, currentUserId }: iMessageItem) {
               >
                 <MessageSquare className="size-3.5" />
                 <span>
-                  {message.repliesCount}{" "}
-                  {message.repliesCount === 1 ? "reply" : "replies"}
+                  {message.replyCount}{" "}
+                  {message.replyCount === 1 ? "reply" : "replies"}
                 </span>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity">
                   View Thread

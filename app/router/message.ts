@@ -1,15 +1,52 @@
-import z from "zod";
+import z, { emoji } from "zod";
 import { standardSecurityMiddleware } from "../middlewares/arcjet/standard";
 import { writeSecurityMiddleware } from "../middlewares/arcjet/write";
 import { requiredMiddleware } from "../middlewares/auth";
 import { base } from "../middlewares/base";
 import { requiredWorkspaceMiddleware } from "../middlewares/workspace";
 import prisma from "@/lib/db";
-import { createMessageSchema, updateMessageSchema } from "../schemas/message";
+import {
+  createMessageSchema,
+  GroupReactionSchema,
+  toggleReactionSchema,
+  updateMessageSchema,
+} from "../schemas/message";
 import { getAvatar } from "@/lib/get-avatar";
 import { Message } from "@/lib/generated/prisma";
 import { readSecurityMiddleware } from "../middlewares/arcjet/read";
 import { ListMessageInput } from "@/lib/types";
+
+function groupReaction(
+  reactions: { emoji: string; userId: string }[],
+  userId: string,
+): GroupReactionSchema[] {
+  const reactionMap = new Map<
+    string,
+    { count: number; reactedByMe: boolean }
+  >();
+
+  for (const reaction of reactions) {
+    const existing = reactionMap.get(reaction.emoji);
+
+    if (existing) {
+      existing.count++;
+      if (reaction.userId === userId) {
+        existing.reactedByMe = true;
+      }
+    } else {
+      reactionMap.set(reaction.emoji, {
+        count: 1,
+        reactedByMe: reaction.userId === userId,
+      });
+    }
+  }
+
+  return Array.from(reactionMap.entries()).map(([emoji, data]) => ({
+    emoji,
+    count: data.count,
+    reactedByMe: data.reactedByMe,
+  }));
+}
 
 export const createMessage = base
   .use(requiredMiddleware)
@@ -88,13 +125,13 @@ export const listMessage = base
       channelId: z.string(),
       limit: z.number().min(1).max(100).optional(),
       cursor: z.string().optional(),
-    })
+    }),
   )
   .output(
     z.object({
       items: z.array(z.custom<ListMessageInput>()),
       nextCursor: z.string().optional(),
-    })
+    }),
   )
   .handler(async ({ input, context, errors }) => {
     const channel = await prisma.channel.findFirst({
@@ -125,6 +162,12 @@ export const listMessage = base
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       include: {
         _count: { select: { replies: true } },
+        MessageReaction: {
+          select: {
+            emoji: true,
+            userId: true,
+          },
+        },
       },
     });
 
@@ -140,7 +183,14 @@ export const listMessage = base
       authorAvatar: m.authorAvatar,
       channelId: m.channelId,
       threadId: m.threadId,
-      repliesCount: m._count.replies,
+      replyCount: m._count.replies,
+      reactions: groupReaction(
+        m.MessageReaction.map((r) => ({
+          emoji: r.emoji,
+          userId: r.userId,
+        })),
+        context.user.id,
+      ),
     }));
 
     const nextCursor =
@@ -168,7 +218,7 @@ export const updateMessage = base
     z.object({
       message: z.custom<Message>(),
       canEdit: z.boolean(),
-    })
+    }),
   )
   .handler(async ({ input, context, errors }) => {
     const message = await prisma.message.findFirst({
@@ -218,13 +268,13 @@ export const listThreadReplies = base
   .input(
     z.object({
       messageId: z.string(),
-    })
+    }),
   )
   .output(
     z.object({
-      parent: z.custom<Message>(),
-      messages: z.array(z.custom<Message>()),
-    })
+      parent: z.custom<ListMessageInput>(),
+      messages: z.array(z.custom<ListMessageInput>()),
+    }),
   )
   .handler(async ({ input, context, errors }) => {
     const parentRow = await prisma.message.findFirst({
@@ -232,6 +282,17 @@ export const listThreadReplies = base
         id: input.messageId,
         Channel: {
           workspaceId: context.workspace.orgCode,
+        },
+      },
+      include: {
+        _count: {
+          select: { replies: true },
+        },
+        MessageReaction: {
+          select: {
+            emoji: true,
+            userId: true,
+          },
         },
       },
     });
@@ -244,15 +305,153 @@ export const listThreadReplies = base
         threadId: input.messageId,
       },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      include: {
+        _count: { select: { replies: true } },
+        MessageReaction: {
+          select: {
+            emoji: true,
+            userId: true,
+          },
+        },
+      },
     });
-    const parent = {
-      ...parentRow,
+    const parent: ListMessageInput = {
+      id: parentRow.id,
+      content: parentRow.content,
+      imageUrl: parentRow.imageUrl,
+      authorAvatar: parentRow.authorAvatar,
+      authorEmail: parentRow.authorEmail,
+      authorId: parentRow.authorId,
+      channelId: parentRow.channelId,
+      authorName: parentRow.authorName,
+      createdAt: parentRow.createdAt,
+      updatedAt: parentRow.updatedAt,
+      threadId: parentRow.threadId,
+      replyCount: parentRow._count.replies,
+      reactions: groupReaction(
+        parentRow.MessageReaction.map((r: { emoji: string; userId: string }) => ({
+          emoji: r.emoji,
+          userId: r.userId,
+        })),
+        context.user.id,
+      ),
     };
-    const messages = replies.map((reply) => ({
-      ...reply,
+    const messages: ListMessageInput[] = replies.map((reply) => ({
+      id: reply.id,
+      content: reply.content,
+      imageUrl: reply.imageUrl,
+      createdAt: reply.createdAt,
+      updatedAt: reply.updatedAt,
+      authorId: reply.authorId,
+      authorEmail: reply.authorEmail,
+      authorName: reply.authorName,
+      authorAvatar: reply.authorAvatar,
+      channelId: reply.channelId,
+      threadId: reply.threadId,
+      replyCount: reply._count.replies,
+      reactions: groupReaction(
+        reply.MessageReaction.map((r: { emoji: string; userId: string }) => ({
+          emoji: r.emoji,
+          userId: r.userId,
+        })),
+        context.user.id,
+      ),
     }));
     return {
       parent,
       messages,
+    };
+  });
+
+export const togglereaction = base
+  .use(requiredMiddleware)
+  .use(requiredWorkspaceMiddleware)
+  .use(standardSecurityMiddleware)
+  .use(writeSecurityMiddleware)
+  .route({
+    method: "POST",
+    path: "/messages/:messageId/reactions",
+    summary: "Toggle reaction",
+    tags: ["Messages"],
+  })
+  .input(toggleReactionSchema)
+  .output(
+    z.object({
+      messageId: z.string(),
+      reactions: z.array(GroupReactionSchema),
+    }),
+  )
+  .handler(async ({ input, context, errors }) => {
+    const messages = await prisma.message.findFirst({
+      where: {
+        id: input.messageId,
+        Channel: {
+          workspaceId: context.workspace.orgCode,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!messages) {
+      throw errors.NOT_FOUND();
+    }
+
+    const inserted = await prisma.messageReaction.createMany({
+      data: [
+        {
+          emoji: input.emoji,
+          messageId: input.messageId,
+          userId: context.user.id,
+          userName: context.user.given_name ?? "John Doe",
+          userAvatar: getAvatar(context.user.picture, context.user.email!),
+          userEmail: context.user.email!,
+        },
+      ],
+      skipDuplicates: true,
+    });
+
+    if (inserted.count === 0) {
+      await prisma.messageReaction.deleteMany({
+        where: {
+          messageId: input.messageId,
+          userId: context.user.id,
+          emoji: input.emoji,
+        },
+      });
+    }
+
+    const updated = await prisma.message.findUnique({
+      where: {
+        id: input.messageId,
+      },
+      include: {
+        MessageReaction: {
+          select: {
+            emoji: true,
+            userId: true,
+          },
+        },
+        _count: {
+          select: {
+            replies: true,
+          },
+        },
+      },
+    });
+
+    if (!updated) {
+      throw errors.NOT_FOUND();
+    }
+
+    return {
+      messageId: updated.id,
+      reactions: groupReaction(
+        (updated.MessageReaction ?? []).map((r) => ({
+          emoji: r.emoji,
+          userId: r.userId,
+        })),
+        context.user.id,
+      ),
     };
   });
