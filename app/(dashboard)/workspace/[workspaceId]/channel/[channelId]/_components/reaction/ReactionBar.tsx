@@ -143,7 +143,7 @@ export function ReactionBar({
   };
   return (
     <div className="mt-1 flex items-center gap-1">
-      {reaction.map((r: GroupReactionSchema) => (
+      {reaction?.map((r: GroupReactionSchema) => (
         <Button
           key={r.emoji}
           type="button"

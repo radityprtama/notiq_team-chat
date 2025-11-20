@@ -8,13 +8,24 @@ import {
 } from "@/components/ui/popover";
 import { Sparkles, SparklesIcon } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
-import { eventIteratorToStream } from "@orpc/client";
+import { eventIteratorToStream } from "@orpc/server";
 import { client } from "@/lib/orpc";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function ComposeAssistant() {
+interface ComposeAssistantProps {
+  content: string;
+  onAccept?: (markdown: string) => void;
+}
+
+export function ComposeAssistant({ content, onAccept }: ComposeAssistantProps) {
   const [open, setOpen] = useState(false);
+  const contentRef = useRef(content);
+
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
   const {
     messages,
     status,
@@ -29,9 +40,9 @@ export function ComposeAssistant() {
       async sendMessages(options) {
         return eventIteratorToStream(
           await client.ai.compose.generate(
-            { content: "" },
-            { signal: options.abortSignal }
-          )
+            { content: contentRef.current },
+            { signal: options.abortSignal },
+          ),
         );
       },
       reconnectToStream() {
@@ -41,7 +52,7 @@ export function ComposeAssistant() {
   });
 
   const lastAssistant = messages.findLast((m) => m.role === "assistant");
-  const summaryText =
+  const composeText =
     lastAssistant?.parts
       .filter((p) => p.type === "text")
       .map((p) => p.text)
@@ -77,7 +88,7 @@ export function ComposeAssistant() {
         return;
       }
 
-      sendMessage({ text: "Help me compose a message" });
+      sendMessage({ text: "Rewrite" });
     } else {
       stop();
       clearError();
@@ -150,9 +161,9 @@ export function ComposeAssistant() {
                 Try Again
               </Button>
             </div>
-          ) : summaryText ? (
+          ) : composeText ? (
             <div className="leading-relaxed text-muted-foreground">
-              {formatSummaryText(summaryText)}
+              {composeText}
             </div>
           ) : status === "submitted" || status === "streaming" ? (
             <div className="space-y-2">
@@ -165,6 +176,37 @@ export function ComposeAssistant() {
               Ready to help you compose a message...
             </p>
           )}
+        </div>
+        <div className="flex items-center justify-end gap-3 border-t px-3 py-2 bg-muted/30">
+          <Button
+            type="submit"
+            size={"sm"}
+            variant={"outline"}
+            onClick={() => {
+              stop();
+              clearError();
+              setMessages([]);
+              setOpen(false);
+            }}
+          >
+            Decline
+          </Button>
+          <Button
+            type="submit"
+            size={"sm"}
+            disabled={!composeText}
+            onClick={() => {
+              if (!composeText) return;
+
+              onAccept?.(composeText);
+              stop();
+              clearError();
+              setMessages([]);
+              setOpen(false);
+            }}
+          >
+            Accept
+          </Button>
         </div>
       </PopoverContent>
     </Popover>

@@ -7,6 +7,7 @@ import { tipTapJsontoMarkdown } from "@/lib/json-to-markdown";
 import { streamText } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamToEventIterator } from "@orpc/server";
+import { aiSecurityMiddleware } from "../middlewares/arcjet/ai";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.LLM_KEY,
@@ -46,6 +47,7 @@ const system = [
 export const generatedThreadSummary = base
   .use(requiredMiddleware)
   .use(requiredWorkspaceMiddleware)
+  .use(aiSecurityMiddleware)
   .route({
     method: "GET",
     path: "/ai/thread/summary",
@@ -55,7 +57,7 @@ export const generatedThreadSummary = base
   .input(
     z.object({
       messageId: z.string(),
-    })
+    }),
   )
   .handler(async ({ input, context, errors }) => {
     const baseMessage = await prisma.message.findFirst({
@@ -114,7 +116,7 @@ export const generatedThreadSummary = base
     const lines = [];
 
     lines.push(
-      `Thread Root - ${parent.authorName} - ${parent.createdAt.toISOString()}`
+      `Thread Root - ${parent.authorName} - ${parent.createdAt.toISOString()}`,
     );
 
     lines.push(parentTxt);
@@ -143,6 +145,7 @@ export const generateCompose = base
 
   .use(requiredMiddleware)
   .use(requiredWorkspaceMiddleware)
+  .use(aiSecurityMiddleware)
   .route({
     method: "POST",
     path: "/ai/compose/generate",
@@ -152,7 +155,7 @@ export const generateCompose = base
   .input(
     z.object({
       content: z.string(),
-    })
+    }),
   )
   .handler(async ({ input, context, errors }) => {
     const markdown = await tipTapJsontoMarkdown(input.content);
