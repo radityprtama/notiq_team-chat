@@ -1,4 +1,4 @@
-# 💬 Notiq Team Chat
+# 💬 Convofy Team Chat
 
 > Modern team collaboration platform built with Next.js
 
@@ -50,4 +50,4 @@ DATABASE_URL=your_database_url
 
 ---
 
-**Notiq**
+**Convofy**

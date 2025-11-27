@@ -4,7 +4,6 @@ import { Menu, X } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import React from "react";
 import { cn } from "@/lib/utils";
-import Logo from "@/public/notique.png";
 import Image from "next/image";
 import {
   RegisterLink,
@@ -43,7 +42,7 @@ export const HeroHeader = () => {
           className={cn(
             "mx-auto mt-2 max-w-6xl px-6 transition-all duration-300 lg:px-12",
             isScrolled &&
-              "bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5",
+              "bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5"
           )}
         >
           <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
@@ -53,8 +52,7 @@ export const HeroHeader = () => {
                 aria-label="home"
                 className="flex items-center space-x-2"
               >
-                <Image src={Logo} alt="logo" width={32} height={32} />
-                <h1 className="text-2xl font-bold">Notiq</h1>
+                <h1 className="text-2xl font-bold">Convofy</h1>
               </Link>
 
               <button

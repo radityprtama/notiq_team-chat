@@ -127,8 +127,8 @@ export default function HeroSection() {
                   as="p"
                   className="mx-auto mt-8 max-w-2xl text-balance text-lg"
                 >
-                  Notiq is a modern, AI-powered communication platform designed
-                  to enhance team collaboration and productivity.
+                  Convofy is a modern, AI-powered communication platform
+                  designed to enhance team collaboration and productivity.
                 </TextEffect>
 
                 <AnimatedGroup
